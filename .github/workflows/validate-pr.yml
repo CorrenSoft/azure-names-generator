@@ -42,8 +42,15 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -out=tfplan -input=false
+        run: terraform plan -input=false
       
+      - name: Render terraform docs and push changes
+        uses: terraform-docs/gh-actions@v1.4.1
+        with:
+          working-dir: .
+          output-file: README.md
+          output-method: print
+          
       - name: Render terraform docs and push changes
         uses: terraform-docs/gh-actions@v1.4.1
         with:
