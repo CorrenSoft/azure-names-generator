@@ -1,0 +1,44 @@
+name: Validate Pull Request 
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: 
+      - main
+
+env:
+  terraform_version: "1.10.0"
+
+jobs:
+  terraform-lint:
+    name: Lint
+    uses: ./.github/workflows/template-lint.yml 
+
+  validate:
+    needs: terraform-lint
+    name: Validate Terraform code
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./test
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.terraform_version }}
+
+      - name: Terraform Format
+        run: terraform fmt -recursive -list=true -check ../
+
+      - name: Terraform init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan -input=false
