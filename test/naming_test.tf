@@ -3,7 +3,7 @@ terraform {
 
 module "name_generator" {
   source      = "../"
-  environment = "develoopment"
+  environment = "development"
   location    = "eastus"
 }
 
