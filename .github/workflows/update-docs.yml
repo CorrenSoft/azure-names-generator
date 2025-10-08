@@ -1,0 +1,20 @@
+name: Update Terraform Docs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-docs:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v3
+
+      - name: Render terraform docs and push changes
+        uses: terraform-docs/gh-actions@v1.4.1
+        with:
+          working-dir: .
+          output-file: README.md
+          output-method: inject
+          git-push: "true"

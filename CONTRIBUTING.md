@@ -19,13 +19,31 @@ cd azure-names-generator
 `git checkout -b feature/my-new-feature`
 
 ### 4. Make Your Changes
-Make your changes in your local repository. Ensure that your code adheres to the project's coding standards and includes appropriate tests.
+Make your changes in your local repository. Ensure that your code adheres to the project's coding standards and includes appropriate tests. 
 
-### 5. Push and Create a Pull Request
+### 5. Updating Documentation
+Documentation is automatically validated in CI. If your changes affect variables, outputs, or other module metadata, make sure to regenerate the docs before committing. Otherwise, your pull request may fail the validation check.  
+You can use the following command in the root directoy to generate the updated documentation:
+
+```bash
+terraform-docs markdown table --output-file README.md --output-mode inject .
+```
+
+> Note: Check [terraform-docs installation](https://terraform-docs.io/user-guide/installation/) if you don't currently have the tool.
+
+### 6. Push and Create a Pull Request
 `git push origin feature/my-new-feature`
 
 Then go to GitHub and open a Pull Request.
 
+## 🚫 Tag Creation Policy
+To ensure consistency and control over published versions:
+
+- Tag creation is restricted to maintainers and release managers.
+- Contributors must not push tags directly.
+
+- ✅ Maintainer Workflow
+Tags like v1.0.0, v1.1.0, etc., will trigger automated validation and prepare the module for publishing to the Terraform Registry.
 
 ## ✅ Guidelines
 
