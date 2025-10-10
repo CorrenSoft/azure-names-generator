@@ -1,0 +1,55 @@
+name: Template - Terraform Lint
+
+on:
+  workflow_call:
+    inputs:
+      working_directory:
+        required: false
+        type: string
+        default: .
+
+jobs:
+  terraform-lint:
+    name: Terraform Lint
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up TFLint
+      uses: terraform-linters/setup-tflint@v4
+
+    - name: Cache TFLint plugins
+      uses: actions/cache@v4
+      with:
+        path: ~/.tflint.d/plugins
+        key: tflint-plugins-${{ runner.os }}-${{ hashFiles('.tflint.hcl') }}
+        restore-keys: tflint-plugins-${{ runner.os }}-
+
+    - name: Run TFLint and Parse Results
+      id: tflint
+      shell: pwsh
+      run: |
+        Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "tflint-reports"
+        New-Item -ItemType Directory -Path "tflint-reports" | Out-Null
+
+        tflint --init -c .tflint.hcl
+        tflint --chdir "${{ inputs.working_directory }}" --recursive -f junit --minimum-failure-severity error > "tflint-reports/report.xml"
+
+        [xml]$xml = Get-Content -Path "tflint-reports/report.xml"
+        $tests = [int]$xml.testsuites.testsuite.tests
+        $failures = [int]$xml.testsuites.testsuite.failures
+        $hasFailures = $failures -gt 0
+
+        Write-Output "::notice title=TFLint Summary::Tests: $tests, Failures: $failures"
+        Write-Output "hasFailures=$hasFailures" >> $env:GITHUB_OUTPUT
+
+    - name: Upload TFLint Report if Failures
+      if: always() && (steps.tflint.outputs.hasFailures == 'True')
+      uses: actions/upload-artifact@v4
+      with:
+        name: tflint-reports
+        path: tflint-reports/
