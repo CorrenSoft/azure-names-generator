@@ -3,9 +3,19 @@ output "environment" {
   value       = var.environment
 }
 
+output "environment_abbr" {
+  description = "The abbreviated environment name."
+  value       = local.environment_abbr
+}
+
+output "generated_names" {
+  description = "A map containing the generated names."
+  value       = local.generated_names
+}
+
 output "location" {
   description = "Location object used in the module instance."
-  value       = var.location
+  value       = local.selected_location
 }
 
 output "warning_short_name" {
